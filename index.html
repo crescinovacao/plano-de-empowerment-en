@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empowerment Plan | Crescimentum</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root{
+    --accent:#007BEA;
+    --accent-dark:#001B71;
+    --accent-light:#B3DFFF;
+    --text:#210000;
+    --text-light:#666666;
+    --border:#e0e0e0;
+    --bg:#ffffff;
+    --bg-soft:#f4f8fe;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:'Aptos','Segoe UI',sans-serif;
+    color:var(--text);
+  }
+
+  .progress-bar{
+    position:fixed;
+    top:0; left:0;
+    height:4px;
+    background:var(--accent);
+    transition:width .3s ease;
+    z-index:10;
+  }
+
+  .screen{
+    display:none;
+    max-width:680px;
+    margin:0 auto;
+    padding:48px 24px 100px;
+    animation:fadeIn .35s ease;
+  }
+  .screen.active{ display:block; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (max-width:480px){
+    .screen{ padding:36px 16px 100px; }
+  }
+
+  .img-placeholder{
+    width:100%;
+    margin-bottom:28px;
+    overflow:hidden;
+    aspect-ratio:16/9;
+    background:var(--bg-soft);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px dashed var(--border);
+  }
+  .img-real{
+    width:100%;
+    margin-bottom:28px;
+    overflow:hidden;
+  }
+
+  .cover-title{
+    font-family:'Raleway',sans-serif;
+    font-weight:800;
+    font-size:clamp(22px,5vw,32px);
+    color:var(--accent);
+    margin:0 0 16px;
+  }
+  .cover-text{
+    font-size:clamp(14px,2.3vw,16px);
+    line-height:1.6;
+    margin-bottom:28px;
+  }
+
+  .instr-title{
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    color:var(--accent);
+    font-size:clamp(20px,4vw,26px);
+    margin:0 0 20px;
+  }
+  .instr-list{ list-style:none; padding:0; margin:0 0 28px; }
+  .instr-list li{
+    padding:10px 0;
+    font-size:14.5px;
+    line-height:1.6;
+  }
+  .instr-list li b{ color:var(--accent); }
+
+  .section-title{
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    color:var(--accent-dark);
+    font-size:clamp(18px,3vw,21px);
+    margin:0 0 6px;
+  }
+  .section-sub{
+    font-size:13.5px;
+    color:var(--text-light);
+    margin:0 0 20px;
+  }
+
+  /* task card */
+  .task-card{
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:18px;
+    background:#fff;
+  }
+  .task-pill-label{
+    display:inline-block;
+    background:var(--accent-light);
+    color:var(--accent-dark);
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    padding:5px 14px;
+    border-radius:20px;
+    margin-bottom:14px;
+  }
+  .task-card-top{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .task-name-input{
+    flex:1;
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:var(--text);
+    border:none;
+    border-bottom:2px solid var(--border);
+    padding:6px 2px;
+    background:transparent;
+  }
+  .task-name-input:focus{ outline:none; border-bottom-color:var(--accent); }
+  .btn-remove-row{
+    flex:0 0 auto;
+    background:none;
+    border:none;
+    color:#c0392b;
+    cursor:pointer;
+    font-size:18px;
+    padding:4px 6px;
+  }
+
+  .task-sub-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .task-sub-field{ flex:1; min-width:140px; }
+  .task-sub-field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:8px;
+  }
+  .task-sub-field input{
+    width:100%;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    padding:9px 10px;
+    font-family:'Aptos','Segoe UI',sans-serif;
+    font-size:14px;
+    color:var(--text);
+  }
+  .task-sub-field input:focus{ outline:none; border-color:var(--accent); }
+
+  .pill-group{ margin-bottom:16px; }
+  .pill-group-label{
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:8px;
+    display:block;
+  }
+  .pill-row{
+    display:grid;
+    grid-template-columns:repeat(10, 1fr);
+    gap:6px;
+  }
+  .mobile-select{
+    display:none;
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    font-family:'Aptos','Segoe UI',sans-serif;
+    font-size:15px;
+    color:var(--text);
+    background:#fff;
+  }
+  .mobile-select:focus{ outline:none; border-color:var(--accent); }
+  @media (max-width:480px){
+    .pill-row{ display:none; }
+    .mobile-select{ display:block; }
+  }
+  .pill{
+    width:100%;
+    aspect-ratio:1;
+    border-radius:8px;
+    border:1.5px solid var(--border);
+    background:#fff;
+    color:var(--text);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .15s ease;
+  }
+  .pill:hover{ border-color:var(--accent); background:var(--bg-soft); }
+  .pill.selected{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+
+  .result-box{
+    background:var(--bg-soft);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-top:6px;
+  }
+  .result-label-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .result-stage-name{
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--accent-dark);
+  }
+  .result-total{
+    font-size:12.5px;
+    color:var(--text-light);
+  }
+  .gauge{
+    display:flex;
+    gap:3px;
+    height:10px;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .gauge-seg{
+    flex:1;
+    background:#e0e0e0;
+    transition:background .2s ease;
+  }
+  .gauge-seg.active-executor{ background:#001B71; }
+  .gauge-seg.active-parceiro{ background:#0047AB; }
+  .gauge-seg.active-mentor{ background:#007BEA; }
+  .gauge-seg.active-coach{ background:#3AA0FF; }
+  .gauge-seg.active-empoderador{ background:#0FA968; }
+
+  .btn-secondary{
+    background:none;
+    border:1.5px solid var(--accent);
+    color:var(--accent);
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:11px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    width:100%;
+  }
+  .btn-secondary:hover{ background:var(--bg-soft); }
+
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:13px 28px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .btn-primary:hover{ background:#0063c5; }
+
+  .btn-danger{
+    background:none;
+    border:1.5px solid #c0392b;
+    color:#c0392b;
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:13px 28px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .btn-danger:hover{ background:#fdf1f0; }
+
+  .btn-back{
+    background:none;
+    border:none;
+    color:var(--text-light);
+    font-family:'Raleway',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    padding:10px 0;
+  }
+  .btn-back:hover{ color:var(--accent); }
+
+  .nav-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:32px;
+  }
+  .nav-bar.end{ justify-content:flex-end; }
+
+  /* legend */
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .legend-item:last-child{ border-bottom:none; }
+  .legend-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    flex:0 0 auto;
+  }
+  .legend-range{ color:var(--text-light); flex:0 0 90px; font-size:12.5px; }
+
+  /* accordion */
+  .accordion-item{
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .accordion-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 20px;
+    background:var(--bg-soft);
+    cursor:pointer;
+    font-family:'Raleway',sans-serif;
+    font-weight:700;
+    color:var(--accent-dark);
+    font-size:15.5px;
+  }
+  .accordion-header .step-num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:24px;
+    height:24px;
+    line-height:1;
+    flex-shrink:0;
+    vertical-align:middle;
+    border-radius:50%;
+    background:var(--accent);
+    color:#fff;
+    font-size:12.5px;
+    margin-right:10px;
+  }
+  .accordion-arrow{ transition:transform .2s ease; color:var(--accent); font-size:13px; }
+  .accordion-item.open .accordion-arrow{ transform:rotate(180deg); }
+  .accordion-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+    padding:0 20px;
+  }
+  .accordion-item.open .accordion-body{
+    max-height:700px;
+    padding:6px 20px 20px;
+  }
+  .accordion-body ul{ padding-left:18px; margin:0; }
+  .accordion-body li{ margin-bottom:9px; font-size:14px; line-height:1.5; }
+
+  select.task-select{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    font-family:'Aptos','Segoe UI',sans-serif;
+    font-size:15px;
+    color:var(--text);
+    margin-bottom:16px;
+    background:#fff;
+  }
+  select.task-select:focus{ outline:none; border-color:var(--accent); }
+  .current-stage-box{
+    background:var(--bg-soft);
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:14px;
+    color:var(--accent-dark);
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  textarea.plan-textarea{
+    width:100%;
+    min-height:150px;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    padding:14px;
+    font-family:'Aptos','Segoe UI',sans-serif;
+    font-size:15px;
+    color:var(--text);
+    resize:vertical;
+  }
+  textarea.plan-textarea:focus{ outline:none; border-color:var(--accent); }
+
+  hr.divider{
+    border:none;
+    border-top:1px solid var(--border);
+    margin:36px 0;
+  }
+
+
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%;"></div>
+
+<!-- SCREEN 1: COVER -->
+<div class="screen active" id="screen-cover">
+  <div class="img-real">
+    <img src="https://i.imgur.com/hDKQyNy.png" alt="Empowerment Plan cover" style="display:block; width:100%; height:auto; border-radius:0;">
+  </div>
+  <h1 class="cover-title">Empowerment Plan</h1>
+  <p class="cover-text">A tool to help you map which tasks you can delegate, assess the ideal empowerment stage for each situation, and build an action plan to develop your team's autonomy.</p>
+  <div class="nav-bar">
+    <button class="btn-primary" onclick="goTo('screen-instructions')">Next →</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: HOW TO USE -->
+<div class="screen" id="screen-instructions">
+  <div class="img-real">
+    <img src="https://i.imgur.com/GQ37w78.png" alt="How to use" style="display:block; width:100%; height:auto; border-radius:0;">
+  </div>
+  <h2 class="instr-title">How to use</h2>
+  <ul class="instr-list">
+    <li><b>A.</b> List the tasks and activities of yours that can be delegated.</li>
+    <li><b>B.</b> Indicate how much of your routine each task takes up.</li>
+    <li><b>C.</b> Identify the person with the greatest potential to take on the task, considering availability, skill and motivation.</li>
+    <li><b>D.</b> Rate that person's competence from 1 to 10 (1 = low, 10 = high).</li>
+    <li><b>E.</b> Rate the activity's risk to the business from 1 to 10 (1 = low, 10 = high).</li>
+    <li><b>F.</b> The tool automatically calculates the recommended empowerment stage.</li>
+  </ul>
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo('screen-cover')">← Back</button>
+    <button class="btn-primary" onclick="goTo('screen-stages')">Start →</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: EMPOWERMENT STAGES -->
+<div class="screen" id="screen-stages">
+  <h2 class="section-title">Empowerment plan</h2>
+  <p class="section-sub">The stage is calculated automatically from Competence minus Risk.</p>
+
+  <div id="taskCards"></div>
+  <button class="btn-secondary" onclick="addTask()">+ Add task</button>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo('screen-instructions')">← Back</button>
+    <button class="btn-primary" onclick="goTo('screen-plan')">Next →</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: ACTION PLAN -->
+<div class="screen" id="screen-plan">
+  <h2 class="section-title">How to apply each stage</h2>
+  <p class="section-sub">Use this guide as support to build your action plan, right below.</p>
+  <div id="accordion"></div>
+
+  <hr class="divider">
+
+  <h2 class="section-title">Action plan</h2>
+  <p class="section-sub">Choose one of the activities and build a plan to take the chosen person through the next empowerment stages, until they reach the empowerment stage (Let Them Do It).</p>
+
+  <select class="task-select" id="taskSelect">
+    <option value="">Select a task</option>
+  </select>
+  <div class="current-stage-box" id="currentStageDisplay"><span style="color:var(--accent);">Current stage: </span><span style="color:var(--text);">—</span></div>
+  <textarea class="plan-textarea" id="actionPlan" placeholder="Describe the steps to move this person through the next stages: what you will assess in the team and in the task, how you will empower them and how you will track progress..."></textarea>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo('screen-stages')">← Back</button>
+    <div style="display:flex; gap:12px;">
+      <button class="btn-danger" onclick="limparCampos()">Clear fields</button>
+      <button class="btn-primary" id="btnDownload" onclick="generatePDF()">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCREEN_ORDER = ['screen-cover', 'screen-instructions', 'screen-stages', 'screen-plan'];
+
+function goTo(screenId){
+  SCREEN_ORDER.forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById(screenId).classList.add('active');
+  const idx = SCREEN_ORDER.indexOf(screenId);
+  const pct = ((idx + 1) / SCREEN_ORDER.length) * 100;
+  const bar = document.getElementById('progressBar');
+  if (screenId === 'screen-cover' || screenId === 'screen-instructions'){
+    bar.style.width = '0%';
+  } else {
+    bar.style.width = pct + '%';
+  }
+  window.scrollTo(0, 0);
+}
+
+const STAGES = [
+  { min:-10, max:-6, label:"Do and show (Doer)", cls:"executor" },
+  { min:-5,  max:-2, label:"Do together (Partner)", cls:"parceiro" },
+  { min:-1,  max:2,  label:"Show the way and let them do it (Mentor)", cls:"mentor" },
+  { min:3,   max:6,  label:"Ask questions and let them do it (Coach)", cls:"coach" },
+  { min:7,   max:10, label:"Let them do it (Empowerer)", cls:"empoderador" }
+];
+
+const STAGE_PREFIX = 'Empowerment stage: ';
+
+function getStage(total){
+  for (const s of STAGES){
+    if (total >= s.min && total <= s.max) return s;
+  }
+  return null;
+}
+
+let taskCount = 0;
+
+function pillRowHTML(fieldName, taskId, selectedValue){
+  let html = '';
+  for (let i=1; i<=10; i++){
+    const sel = String(selectedValue) === String(i) ? ' selected' : '';
+    html += `<button type="button" class="pill${sel}" data-value="${i}" onclick="setFieldValue(${taskId}, '${fieldName}', ${i})">${i}</button>`;
+  }
+  return html;
+}
+
+function mobileSelectHTML(fieldName, taskId, selectedValue){
+  let opts = '<option value="">Select</option>';
+  for (let i=1; i<=10; i++){
+    const sel = String(selectedValue) === String(i) ? ' selected' : '';
+    opts += `<option value="${i}"${sel}>${i}</option>`;
+  }
+  return `<select class="mobile-select" data-field-select="${fieldName}" onchange="setFieldValue(${taskId}, '${fieldName}', this.value)">${opts}</select>`;
+}
+
+function addTask(prefill){
+  prefill = prefill || {};
+  taskCount++;
+  const id = taskCount;
+  const container = document.getElementById('taskCards');
+  const card = document.createElement('div');
+  card.className = 'task-card';
+  card.id = 'task-' + id;
+  card.innerHTML = `
+    <div class="task-card-top">
+      <span class="task-pill-label" data-role="pill-label">Activity/Task</span>
+      <button class="btn-remove-row" onclick="removeTask(${id})" title="Remove" style="margin-left:auto;">✕</button>
+    </div>
+    <input type="text" class="task-name-input" data-field="tarefa" placeholder="Activity/task name" value="${prefill.tarefa || ''}" style="width:100%; margin-bottom:14px;">
+    <div class="task-sub-row">
+      <div class="task-sub-field">
+        <label>Time</label>
+        <input type="text" data-field="tempo" placeholder="E.g.: 4h/week" value="${prefill.tempo || ''}">
+      </div>
+      <div class="task-sub-field">
+        <label>Team member</label>
+        <input type="text" data-field="liderado" placeholder="Name" value="${prefill.liderado || ''}">
+      </div>
+    </div>
+    <div class="pill-group">
+      <span class="pill-group-label">Person's competence (1 to 10)</span>
+      <div class="pill-row" data-field="competencia">${pillRowHTML('competencia', id, prefill.competencia)}</div>
+      ${mobileSelectHTML('competencia', id, prefill.competencia)}
+    </div>
+    <div class="pill-group">
+      <span class="pill-group-label">Risk to the business (1 to 10)</span>
+      <div class="pill-row" data-field="risco">${pillRowHTML('risco', id, prefill.risco)}</div>
+      ${mobileSelectHTML('risco', id, prefill.risco)}
+    </div>
+    <div class="result-box">
+      <div class="result-label-row">
+        <span class="result-stage-name">Fill in competence and risk</span>
+        <span class="result-total"></span>
+      </div>
+      <div class="gauge">
+        <div class="gauge-seg" data-seg="executor"></div>
+        <div class="gauge-seg" data-seg="parceiro"></div>
+        <div class="gauge-seg" data-seg="mentor"></div>
+        <div class="gauge-seg" data-seg="coach"></div>
+        <div class="gauge-seg" data-seg="empoderador"></div>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  card.querySelectorAll('input').forEach(inp => inp.addEventListener('input', refreshTaskOptions));
+  card.dataset.competencia = prefill.competencia || '';
+  card.dataset.risco = prefill.risco || '';
+  updateTaskResult(id);
+  renumberTaskPills();
+  refreshTaskOptions();
+}
+
+function renumberTaskPills(){
+  document.querySelectorAll('.task-card').forEach((card, idx) => {
+    const pill = card.querySelector('[data-role="pill-label"]');
+    if (pill) pill.textContent = 'Activity/Task ' + (idx + 1);
+  });
+}
+
+function setFieldValue(taskId, field, value){
+  const card = document.getElementById('task-' + taskId);
+  card.dataset[field] = value;
+  card.querySelectorAll(`.pill-row[data-field="${field}"] .pill`).forEach(p => {
+    p.classList.toggle('selected', p.dataset.value === String(value));
+  });
+  const sel = card.querySelector(`select[data-field-select="${field}"]`);
+  if (sel) sel.value = value;
+  updateTaskResult(taskId);
+}
+
+function updateTaskResult(taskId){
+  const card = document.getElementById('task-' + taskId);
+  const comp = card.dataset.competencia;
+  const risco = card.dataset.risco;
+  const stageName = card.querySelector('.result-stage-name');
+  const totalLabel = card.querySelector('.result-total');
+  const segs = card.querySelectorAll('.gauge-seg');
+  segs.forEach(s => { s.className = 'gauge-seg'; });
+
+  if (!comp || !risco){
+    stageName.textContent = 'Fill in competence and risk';
+    totalLabel.textContent = '';
+    return;
+  }
+  const total = parseInt(comp) - parseInt(risco);
+  const stage = getStage(total);
+  stageName.innerHTML = stage
+    ? `<span style="color:var(--accent);">${STAGE_PREFIX}</span><span style="color:var(--text);">${stage.label}</span>`
+    : '–';
+  totalLabel.textContent = 'Total: ' + total;
+  if (stage){
+    const seg = card.querySelector(`.gauge-seg[data-seg="${stage.cls}"]`);
+    if (seg) seg.classList.add('active-' + stage.cls);
+  }
+  refreshTaskOptions();
+}
+
+function removeTask(id){
+  const card = document.getElementById('task-' + id);
+  if (card) card.remove();
+  renumberTaskPills();
+  refreshTaskOptions();
+}
+
+function refreshTaskOptions(){
+  const select = document.getElementById('taskSelect');
+  const currentValue = select.value;
+  select.innerHTML = '<option value="">Select a task</option>';
+  document.querySelectorAll('.task-card').forEach(card => {
+    const nameInput = card.querySelector('[data-field="tarefa"]');
+    const name = nameInput ? nameInput.value.trim() : '';
+    if (name){
+      const opt = document.createElement('option');
+      opt.value = card.id;
+      opt.textContent = name;
+      select.appendChild(opt);
+    }
+  });
+  if ([...select.options].some(o => o.value === currentValue)){
+    select.value = currentValue;
+  }
+  updateCurrentStageDisplay();
+}
+
+function updateCurrentStageDisplay(){
+  const select = document.getElementById('taskSelect');
+  const display = document.getElementById('currentStageDisplay');
+  const cardId = select.value;
+  if (!cardId){
+    display.innerHTML = '<span style="color:var(--accent);">Current stage: </span><span style="color:var(--text);">—</span>';
+    return;
+  }
+  const card = document.getElementById(cardId);
+  let stageName = card ? card.querySelector('.result-stage-name').textContent : '—';
+  stageName = stageName.replace(STAGE_PREFIX, '');
+  display.innerHTML = `<span style="color:var(--accent);">Current stage: </span><span style="color:var(--text);">${stageName}</span>`;
+}
+
+document.getElementById('taskSelect').addEventListener('change', updateCurrentStageDisplay);
+
+function limparCampos(){
+  if (!confirm('This will clear all tasks and the action plan. Do you want to continue?')) return;
+  document.getElementById('taskCards').innerHTML = '';
+  document.getElementById('actionPlan').value = '';
+  taskCount = 0;
+  addTask();
+}
+
+const ACCORDION_STEPS = [
+  {
+    title: "Assess the team",
+    items: [
+      "Consider the profile and skills needed to carry out the work.",
+      "Questions to learn more about your team's skills and motivations: What does the person do well? What don't they do well? What types of tasks and projects do they enjoy? What kind of task would they like to do that they aren't doing now? What are their biggest challenges in their daily routine?",
+      "Assess who has the greatest potential to take on this task, considering availability, skill and motivation.",
+      "What kind of training is needed and available to build the team member's capability? How much time will you have to spend preparing them to perform this task?"
+    ]
+  },
+  {
+    title: "Assess the task",
+    items: [
+      "Define clearly and in detail: the objective and its connection to the strategy and current context, the expected results, the performance and quality indicators, the steps to follow and the resources needed.",
+      "Align on roles, responsibilities, performance and quality indicators, the completion deadline and how the person will be supported.",
+      "Analyze the risks and how they can be minimized, preparing and training the person before delegating."
+    ]
+  },
+  {
+    title: "Empower",
+    items: [
+      "What questions will you ask to let the person express how they feel about this task?",
+      "What questions will you ask to confirm the person's understanding of the task?",
+      "Grant the authority needed to carry out the delegated work. If at every step you have to be consulted to authorize an action, both you and the person who received the task lose time. When delegating, also give autonomy to whoever receives the task."
+    ]
+  },
+  {
+    title: "Follow up",
+    items: [
+      "How will you track the person's progress on the task? What will the checkpoints be and when will they happen?",
+      "Create the conditions the person needs to complete the task successfully. Avoid micromanaging what is being done or offering opinions all the time. If the person is prepared, let them do the work. Support only where necessary.",
+      "Allow and encourage people to find more efficient ways of doing the task. Give freedom and autonomy so the process can be improved, even if you created it. This builds autonomy, ownership and accountability, and motivates the team.",
+      "Recognize people and celebrate the results."
+    ]
+  }
+];
+
+function buildAccordion(){
+  const container = document.getElementById('accordion');
+  ACCORDION_STEPS.forEach((step, idx) => {
+    const item = document.createElement('div');
+    item.className = 'accordion-item' + (idx === 0 ? ' open' : '');
+    item.innerHTML = `
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span style="display:inline-flex; align-items:center;"><span class="step-num">${idx+1}</span>${step.title}</span>
+        <span class="accordion-arrow">▾</span>
+      </div>
+      <div class="accordion-body">
+        <ul>${step.items.map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function toggleAccordion(headerEl){
+  headerEl.parentElement.classList.toggle('open');
+}
+
+function loadImageAsDataURL(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        resolve({ dataUrl: canvas.toDataURL('image/png'), ratio: img.naturalWidth / img.naturalHeight });
+      } catch (e){
+        reject(e);
+      }
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw4HqlqDWZMNkbLY1jyEfgEKXM-50Z1il0BCleH5t-kWq42B5_sFBxAEEMeJTS_KaxROw/exec';
+
+async function enviarDadosParaPlanilha(){
+  try {
+    const taskSelect = document.getElementById('taskSelect');
+    const chosenTask = taskSelect.options[taskSelect.selectedIndex] ? taskSelect.options[taskSelect.selectedIndex].text : '';
+    const planoAcao = document.getElementById('actionPlan').value || '';
+
+    const tarefas = [];
+    document.querySelectorAll('.task-card').forEach(card => {
+      const tarefa = card.querySelector('[data-field="tarefa"]').value || '(no name)';
+      const tempo = card.querySelector('[data-field="tempo"]').value || '';
+      const liderado = card.querySelector('[data-field="liderado"]').value || '';
+      const comp = card.dataset.competencia || '';
+      const risco = card.dataset.risco || '';
+      const totalText = card.querySelector('.result-total').textContent || '';
+      const total = totalText.replace('Total: ', '');
+      const estagio = card.querySelector('.result-stage-name').textContent.replace(STAGE_PREFIX, '');
+      tarefas.push({ tarefa, tempo, liderado, competencia: comp, risco, total, estagio });
+    });
+
+    await fetch(GOOGLE_SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        dataHora: new Date().toLocaleString('en-US'),
+        tarefas,
+        tarefaEscolhida: chosenTask,
+        planoAcao
+      })
+    });
+  } catch (err){
+    console.error('Could not save to the spreadsheet:', err);
+  }
+}
+
+async function generatePDF(){
+  const btn = document.getElementById('btnDownload');
+  const originalText = btn.textContent;
+  btn.textContent = 'Generating PDF...';
+  btn.disabled = true;
+
+  enviarDadosParaPlanilha();
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = 210;
+    const margin = 14;
+
+    let logo = null;
+    try {
+      logo = await loadImageAsDataURL('https://i.imgur.com/fUPVKmL.png');
+    } catch (e){
+      logo = null;
+    }
+
+    function drawHeader(title){
+      doc.setFillColor(0, 27, 113);
+      doc.rect(0, 0, pageWidth, 22, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text(title, margin, 13);
+      if (logo){
+        const logoH = 10;
+        const logoW = logoH * logo.ratio;
+        doc.addImage(logo.dataUrl, 'PNG', pageWidth - margin - logoW, 6, logoW, logoH);
+      }
+    }
+
+    // PAGE 1: table with all activities
+    drawHeader('Empowerment plan');
+
+    const rows = [];
+    document.querySelectorAll('.task-card').forEach(card => {
+      const tarefa = card.querySelector('[data-field="tarefa"]').value || '(no name)';
+      const tempo = card.querySelector('[data-field="tempo"]').value || '-';
+      const liderado = card.querySelector('[data-field="liderado"]').value || '-';
+      const comp = card.dataset.competencia || '-';
+      const risco = card.dataset.risco || '-';
+      const totalText = card.querySelector('.result-total').textContent || '';
+      const total = totalText.replace('Total: ', '') || '-';
+      const stageName = card.querySelector('.result-stage-name').textContent.replace(STAGE_PREFIX, '');
+      rows.push([tarefa, tempo, liderado, comp, risco, total, stageName]);
+    });
+
+    doc.autoTable({
+      startY: 30,
+      head: [['Activity/Task', 'Time', 'Team member', 'Competence', 'Risk', 'Total', 'Empowerment stage']],
+      body: rows,
+      margin: { left: margin, right: margin },
+      styles: {
+        font: 'helvetica',
+        fontSize: 9,
+        textColor: [33, 0, 0],
+        lineColor: [224, 224, 224],
+        lineWidth: 0.1,
+        cellPadding: 3,
+        valign: 'middle'
+      },
+      headStyles: {
+        fillColor: [0, 27, 113],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      alternateRowStyles: { fillColor: [244, 248, 254] },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 26 },
+        3: { cellWidth: 26, halign: 'center' },
+        4: { cellWidth: 16, halign: 'center' },
+        5: { cellWidth: 14, halign: 'center' },
+        6: { cellWidth: 50 }
+      }
+    });
+
+    // PAGE 2: action plan for the chosen task
+    doc.addPage();
+    drawHeader('Action plan');
+    let y = 32;
+
+    doc.setTextColor(33, 0, 0);
+    const taskSelect = document.getElementById('taskSelect');
+    const cardId = taskSelect.value;
+    const chosenTask = taskSelect.options[taskSelect.selectedIndex] ? taskSelect.options[taskSelect.selectedIndex].text : '-';
+    const chosenCard = cardId ? document.getElementById(cardId) : null;
+    const chosenLiderado = chosenCard ? (chosenCard.querySelector('[data-field="liderado"]').value || '-') : '-';
+    const stageOnly = document.getElementById('currentStageDisplay').textContent.replace('Current stage: ', '');
+
+    function labelValueLine(label, value){
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text(label, margin, y);
+      const labelWidth = doc.getTextWidth(label);
+      doc.setFont('helvetica', 'normal');
+      doc.text(value, margin + labelWidth, y);
+      y += 7;
+    }
+
+    labelValueLine('Chosen task: ', chosenTask);
+    labelValueLine('Team member: ', chosenLiderado);
+    labelValueLine('Current stage: ', stageOnly);
+    y += 4;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 123, 234);
+    doc.text('Action plan:', margin, y);
+    doc.setTextColor(33, 0, 0);
+    y += 8;
+
+    const planText = document.getElementById('actionPlan').value || '(not filled in)';
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10.5);
+    const splitPlan = doc.splitTextToSize(planText, pageWidth - margin*2);
+    splitPlan.forEach(line => {
+      if (y > 280) { doc.addPage(); y = 20; }
+      doc.text(line, margin, y);
+      y += 5.5;
+    });
+
+    doc.save('Empowerment Plan - Result.pdf');
+  } catch (err){
+    alert('Could not generate the PDF. Please try again.');
+    console.error(err);
+  }
+
+  btn.textContent = originalText;
+  btn.disabled = false;
+}
+
+buildAccordion();
+addTask();
+</script>
+
+</body>
+</html>
